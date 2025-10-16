@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIF Animator - Create Animated GIFs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .upload-section {
+            background: #f8f9fa;
+            border: 2px dashed #667eea;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-section:hover {
+            border-color: #764ba2;
+            background: #f0f1ff;
+        }
+
+        .upload-section.dragover {
+            border-color: #764ba2;
+            background: #e8eaff;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .controls {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #d3d3d3;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+
+        .value-display {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .preview-section {
+            display: none;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .preview-section.active {
+            display: block;
+        }
+
+        .preview-images {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .preview-images img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 2px solid #ddd;
+        }
+
+        .result-section {
+            display: none;
+            text-align: center;
+        }
+
+        .result-section.active {
+            display: block;
+        }
+
+        .result-gif {
+            max-width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+            margin-bottom: 20px;
+        }
+
+        .progress {
+            display: none;
+            margin: 20px 0;
+        }
+
+        .progress.active {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .file-count {
+            color: #667eea;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .upload-section {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 GIF Animator</h1>
+        <p class="subtitle">Upload images and create animated GIFs in seconds</p>
+
+        <div class="upload-section" id="uploadSection">
+            <div class="upload-icon">📁</div>
+            <p style="font-size: 1.2em; color: #333; margin-bottom: 15px;">
+                <strong>Drop images here or click to browse</strong>
+            </p>
+            <p style="color: #666; margin-bottom: 20px;">
+                Select multiple images or a folder
+            </p>
+            <input type="file" id="fileInput" class="file-input" accept="image/*" multiple webkitdirectory directory>
+            <button class="btn" onclick="document.getElementById('fileInput').click()">
+                Choose Images
+            </button>
+            <p class="file-count" id="fileCount"></p>
+        </div>
+
+        <div class="preview-section" id="previewSection">
+            <h3 style="margin-bottom: 15px; color: #333;">Selected Images</h3>
+            <div class="preview-images" id="previewImages"></div>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>
+                    Frame Delay: <span class="value-display" id="delayValue">100 ms</span>
+                </label>
+                <input type="range" id="frameDelay" min="50" max="2000" step="50" value="100">
+                <p style="color: #666; font-size: 0.85em; margin-top: 5px;">
+                    Adjust the time between frames (50ms = fast, 2000ms = slow)
+                </p>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn" id="generateBtn" onclick="generateGif()" disabled>
+                    Generate GIF
+                </button>
+                <button class="btn" id="resetBtn" onclick="resetApp()" style="background: #6c757d;">
+                    Reset
+                </button>
+            </div>
+        </div>
+
+        <div class="progress" id="progress">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill">0%</div>
+            </div>
+        </div>
+
+        <div class="result-section" id="resultSection">
+            <h3 style="margin-bottom: 15px; color: #333;">Your Animated GIF</h3>
+            <img id="resultGif" class="result-gif" alt="Generated GIF">
+            <div class="action-buttons">
+                <button class="btn" id="downloadBtn" onclick="downloadGif()">
+                    Download GIF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.js"></script>
+    <script>
+        let selectedFiles = [];
+        let generatedGifBlob = null;
+
+        // DOM elements
+        const uploadSection = document.getElementById('uploadSection');
+        const fileInput = document.getElementById('fileInput');
+        const previewSection = document.getElementById('previewSection');
+        const previewImages = document.getElementById('previewImages');
+        const fileCount = document.getElementById('fileCount');
+        const frameDelay = document.getElementById('frameDelay');
+        const delayValue = document.getElementById('delayValue');
+        const generateBtn = document.getElementById('generateBtn');
+        const progress = document.getElementById('progress');
+        const progressFill = document.getElementById('progressFill');
+        const resultSection = document.getElementById('resultSection');
+        const resultGif = document.getElementById('resultGif');
+
+        // Drag and drop handlers
+        uploadSection.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadSection.classList.add('dragover');
+        });
+
+        uploadSection.addEventListener('dragleave', () => {
+            uploadSection.classList.remove('dragover');
+        });
+
+        uploadSection.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadSection.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
+            if (files.length > 0) {
+                handleFiles(files);
+            }
+        });
+
+        // File input handler
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files).filter(file => file.type.startsWith('image/'));
+            if (files.length > 0) {
+                handleFiles(files);
+            }
+        });
+
+        // Frame delay slider
+        frameDelay.addEventListener('input', (e) => {
+            delayValue.textContent = `${e.target.value} ms`;
+        });
+
+        // Handle selected files
+        function handleFiles(files) {
+            selectedFiles = files.sort((a, b) => a.name.localeCompare(b.name));
+            displayPreviews();
+            fileCount.textContent = `${selectedFiles.length} image${selectedFiles.length !== 1 ? 's' : ''} selected`;
+            generateBtn.disabled = selectedFiles.length < 2;
+            resultSection.classList.remove('active');
+        }
+
+        // Display image previews
+        function displayPreviews() {
+            previewImages.innerHTML = '';
+            previewSection.classList.add('active');
+
+            selectedFiles.slice(0, 20).forEach(file => {
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                img.onload = () => URL.revokeObjectURL(img.src);
+                previewImages.appendChild(img);
+            });
+
+            if (selectedFiles.length > 20) {
+                const more = document.createElement('div');
+                more.style.cssText = 'display: flex; align-items: center; justify-content: center; width: 80px; height: 80px; background: #667eea; color: white; border-radius: 6px; font-weight: 600;';
+                more.textContent = `+${selectedFiles.length - 20}`;
+                previewImages.appendChild(more);
+            }
+        }
+
+        // Generate GIF
+        async function generateGif() {
+            if (selectedFiles.length < 2) {
+                alert('Please select at least 2 images');
+                return;
+            }
+
+            generateBtn.disabled = true;
+            progress.classList.add('active');
+            resultSection.classList.remove('active');
+
+            const delay = parseInt(frameDelay.value);
+            const gif = new GIF({
+                workers: 2,
+                quality: 10,
+                workerScript: 'https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js'
+            });
+
+            // Load and add images to GIF
+            let loaded = 0;
+            for (const file of selectedFiles) {
+                const img = await loadImage(file);
+                gif.addFrame(img, { delay: delay });
+                loaded++;
+                updateProgress(loaded / selectedFiles.length * 50);
+            }
+
+            gif.on('progress', (p) => {
+                updateProgress(50 + p * 50);
+            });
+
+            gif.on('finished', (blob) => {
+                generatedGifBlob = blob;
+                const url = URL.createObjectURL(blob);
+                resultGif.src = url;
+                resultSection.classList.add('active');
+                progress.classList.remove('active');
+                generateBtn.disabled = false;
+                updateProgress(0);
+            });
+
+            gif.render();
+        }
+
+        // Load image as Image element
+        function loadImage(file) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.src = URL.createObjectURL(file);
+            });
+        }
+
+        // Update progress bar
+        function updateProgress(percent) {
+            const roundedPercent = Math.round(percent);
+            progressFill.style.width = `${roundedPercent}%`;
+            progressFill.textContent = `${roundedPercent}%`;
+        }
+
+        // Download GIF
+        function downloadGif() {
+            if (!generatedGifBlob) return;
+
+            const url = URL.createObjectURL(generatedGifBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `animated-${Date.now()}.gif`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Reset application
+        function resetApp() {
+            selectedFiles = [];
+            generatedGifBlob = null;
+            fileInput.value = '';
+            previewSection.classList.remove('active');
+            resultSection.classList.remove('active');
+            progress.classList.remove('active');
+            fileCount.textContent = '';
+            generateBtn.disabled = true;
+            frameDelay.value = 100;
+            delayValue.textContent = '100 ms';
+        }
+    </script>
+</body>
+</html>
