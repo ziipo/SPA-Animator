@@ -26,7 +26,7 @@
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             padding: 40px;
-            max-width: 800px;
+            max-width: 1400px;
             width: 100%;
         }
 
@@ -50,7 +50,7 @@
             border-radius: 12px;
             padding: 40px;
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             transition: all 0.3s ease;
             cursor: pointer;
         }
@@ -99,7 +99,7 @@
         }
 
         .controls {
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             padding: 20px;
             background: #f8f9fa;
             border-radius: 12px;
@@ -189,6 +189,31 @@
             border: 2px solid #ddd;
         }
 
+        .content-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        @media (min-width: 1024px) {
+            .content-wrapper {
+                flex-direction: row;
+                align-items: flex-start;
+            }
+
+            .left-column {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .right-column {
+                flex: 1;
+                min-width: 0;
+                position: sticky;
+                top: 20px;
+            }
+        }
+
         .result-section {
             display: none;
             text-align: center;
@@ -267,60 +292,66 @@
         <h1>🎬 GIF Animator</h1>
         <p class="subtitle">Upload images and create animated GIFs in seconds</p>
 
-        <div class="upload-section" id="uploadSection">
-            <div class="upload-icon">📁</div>
-            <p style="font-size: 1.2em; color: #333; margin-bottom: 15px;">
-                <strong>Drop images here or click to browse</strong>
-            </p>
-            <p style="color: #666; margin-bottom: 20px;">
-                Select multiple images or a folder
-            </p>
-            <input type="file" id="fileInput" class="file-input" accept="image/*" multiple webkitdirectory directory>
-            <button class="btn" onclick="document.getElementById('fileInput').click()">
-                Choose Images
-            </button>
-            <p class="file-count" id="fileCount"></p>
-        </div>
+        <div class="content-wrapper">
+            <div class="left-column">
+                <div class="upload-section" id="uploadSection">
+                    <div class="upload-icon">📁</div>
+                    <p style="font-size: 1.2em; color: #333; margin-bottom: 15px;">
+                        <strong>Drop images here or click to browse</strong>
+                    </p>
+                    <p style="color: #666; margin-bottom: 20px;">
+                        Select multiple images or a folder
+                    </p>
+                    <input type="file" id="fileInput" class="file-input" accept="image/*" multiple webkitdirectory directory>
+                    <button class="btn" onclick="document.getElementById('fileInput').click()">
+                        Choose Images
+                    </button>
+                    <p class="file-count" id="fileCount"></p>
+                </div>
 
-        <div class="preview-section" id="previewSection">
-            <h3 style="margin-bottom: 15px; color: #333;">Selected Images</h3>
-            <div class="preview-images" id="previewImages"></div>
-        </div>
+                <div class="preview-section" id="previewSection">
+                    <h3 style="margin-bottom: 15px; color: #333;">Selected Images</h3>
+                    <div class="preview-images" id="previewImages"></div>
+                </div>
 
-        <div class="controls">
-            <div class="control-group">
-                <label>
-                    Frame Delay: <span class="value-display" id="delayValue">100 ms</span>
-                </label>
-                <input type="range" id="frameDelay" min="50" max="2000" step="50" value="100">
-                <p style="color: #666; font-size: 0.85em; margin-top: 5px;">
-                    Adjust the time between frames (50ms = fast, 2000ms = slow)
-                </p>
+                <div class="controls">
+                    <div class="control-group">
+                        <label>
+                            Frame Delay: <span class="value-display" id="delayValue">100 ms</span>
+                        </label>
+                        <input type="range" id="frameDelay" min="50" max="2000" step="50" value="100">
+                        <p style="color: #666; font-size: 0.85em; margin-top: 5px;">
+                            Adjust the time between frames (50ms = fast, 2000ms = slow)
+                        </p>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn" id="generateBtn" onclick="generateGif()" disabled>
+                            Generate GIF
+                        </button>
+                        <button class="btn" id="resetBtn" onclick="resetApp()" style="background: #6c757d;">
+                            Reset
+                        </button>
+                    </div>
+                </div>
+
+                <div class="progress" id="progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill">0%</div>
+                    </div>
+                </div>
             </div>
 
-            <div class="action-buttons">
-                <button class="btn" id="generateBtn" onclick="generateGif()" disabled>
-                    Generate GIF
-                </button>
-                <button class="btn" id="resetBtn" onclick="resetApp()" style="background: #6c757d;">
-                    Reset
-                </button>
-            </div>
-        </div>
-
-        <div class="progress" id="progress">
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill">0%</div>
-            </div>
-        </div>
-
-        <div class="result-section" id="resultSection">
-            <h3 style="margin-bottom: 15px; color: #333;">Your Animated GIF</h3>
-            <img id="resultGif" class="result-gif" alt="Generated GIF">
-            <div class="action-buttons">
-                <button class="btn" id="downloadBtn" onclick="downloadGif()">
-                    Download GIF
-                </button>
+            <div class="right-column">
+                <div class="result-section" id="resultSection">
+                    <h3 style="margin-bottom: 15px; color: #333;">Your Animated GIF</h3>
+                    <img id="resultGif" class="result-gif" alt="Generated GIF">
+                    <div class="action-buttons">
+                        <button class="btn" id="downloadBtn" onclick="downloadGif()">
+                            Download GIF
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
