@@ -303,9 +303,14 @@
                         Select multiple images or a folder
                     </p>
                     <input type="file" id="fileInput" class="file-input" accept="image/*" multiple webkitdirectory directory>
-                    <button class="btn" onclick="document.getElementById('fileInput').click()">
-                        Choose Images
-                    </button>
+                    <div class="action-buttons">
+                        <button class="btn" onclick="document.getElementById('fileInput').click()">
+                            Choose Images
+                        </button>
+                        <button class="btn" onclick="loadSampleImages()" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                            Try Sample
+                        </button>
+                    </div>
                     <p class="file-count" id="fileCount"></p>
                 </div>
 
@@ -406,6 +411,32 @@
         frameDelay.addEventListener('input', (e) => {
             delayValue.textContent = `${e.target.value} ms`;
         });
+
+        // Load sample images from the sample folder
+        async function loadSampleImages() {
+            try {
+                const sampleFiles = [];
+                // Get list of sample image files (frame-002.png to frame-030.png)
+                for (let i = 2; i <= 30; i++) {
+                    const frameNum = String(i).padStart(3, '0');
+                    const response = await fetch(`sample/frame-${frameNum}.png`);
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        const file = new File([blob], `frame-${frameNum}.png`, { type: 'image/png' });
+                        sampleFiles.push(file);
+                    }
+                }
+
+                if (sampleFiles.length > 0) {
+                    handleFiles(sampleFiles);
+                } else {
+                    alert('Sample images not found. Please ensure the sample folder is available.');
+                }
+            } catch (error) {
+                console.error('Error loading sample images:', error);
+                alert('Failed to load sample images. Please try uploading your own images.');
+            }
+        }
 
         // Handle selected files
         function handleFiles(files) {
